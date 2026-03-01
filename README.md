@@ -41,6 +41,50 @@ StarterPlayer/
 
 ---
 
+## วิธีใส่ Animation และ VFX ให้กับสกิล
+
+คุณสามารถกำหนด Animation กับ VFX สำหรับแต่ละสกิลในไฟล์ `CombatConfig.lua` ได้เลย โดยกำหนด `AnimationId` และ `VFXId` ในแต่ละสกิล เช่น:
+
+```lua
+["MySkill"] = {
+    DisplayName = "หมัดสายฟ้า",
+    Keybind = Enum.KeyCode.Q,
+    Cooldown = 5,
+    Damage = 80,
+    Range = 10,
+    ManaCost = 20,
+    CastTime = 0.3,
+    VFXId = "rbxassetid://1234567", -- ไอดี Effect (Particle/Asset อื่น)
+    AnimationId = "rbxassetid://7654321", -- ไอดี Animation
+},
+```
+
+### วิธีเพิ่ม Animation
+
+1. อัปโหลด Animation เข้า Roblox เพื่อรับ AssetId (`rbxassetid://...`)  
+2. ใส่ค่า `AnimationId` ในแต่ละสกิลตามตัวอย่างด้านบน
+
+`AnimationModule.lua` ใน `ReplicatedStorage` จะรับผิดชอบเปลี่ยน Animation เมื่อตัวละครใช้สกิล  
+ไฟล์นี้รองรับฟังก์ชัน `PlaySkillAnimation(character, skillId)` และ `PlayBasicAttackAnimation(character)`  
+แค่ใส่ `AnimationId` ให้แต่ละสกิลใน `CombatConfig.lua` แล้วระบบจะเล่นอัตโนมัติเมื่อใช้สกิล
+
+### วิธีเพิ่ม VFX (Effects)
+
+1. สร้างหรือหา Effect ที่ต้องการ แล้วอัปโหลด/วางใน Assets เพื่อรับ `rbxassetid://...`
+2. ใส่ค่า `VFXId` ให้แต่ละสกิลเหมือนตัวอย่างบน
+
+`VFXModule.lua` ใน `ReplicatedStorage` จะรับผิดชอบเล่น Effect  
+ฟังก์ชันหลักคือ `PlaySkillEffect(character, skillId, targetPos)`  
+ถ้าใส่/เปลี่ยน `VFXId` ใน Config ก็จะเล่น Effect ตามนั้นอัตโนมัติ
+
+#### หมายเหตุ:
+- ไฟล์ตัวอย่าง (`VFXModule.lua`, `AnimationModule.lua`) ต้องปรับเองให้รองรับ AssetId ด้วย
+- ระบบนี้แยก Load/Cache Animation, Effect ให้อยู่แล้ว แค่ใส่ Id ลงใน `CombatConfig.lua` สำหรับแต่ละสกิลก็ใช้งานได้ทันที
+- ในโค้ดสามารถเพิ่ม/แก้ไขการเล่น Animation หรือ Effect เพิ่มเติมได้เองหากต้องการลูกเล่นพิเศษ
+
+
+
+
 ## การตั้งค่า
 
 เปิด `CombatConfig.lua`:
