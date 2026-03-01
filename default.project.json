@@ -1,0 +1,39 @@
+{
+	"name": "RobloxCombatSystem",
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+			"CombatConfig": {
+				"$path": "src/shared/CombatConfig.lua"
+			},
+			"VFXModule": {
+				"$path": "src/shared/VFXModule.lua"
+			},
+			"CombatSystem": {
+				"$path": "src/shared/CombatSystem.lua"
+			},
+			"AnimationModule": {
+				"$path": "src/shared/AnimationModule.lua"
+			}
+		},
+		"ServerScriptService": {
+			"$className": "ServerScriptService",
+			"CombatHandler": {
+				"$path": "src/server/CombatHandler.lua"
+			}
+		},
+		"StarterPlayer": {
+			"$className": "StarterPlayer",
+			"StarterPlayerScripts": {
+				"$className": "StarterPlayerScripts",
+				"CombatInput": {
+					"$path": "src/client/CombatInput.lua"
+				},
+				"CombatUI": {
+					"$path": "src/client/CombatUI.lua"
+				}
+			}
+		}
+	}
+}
