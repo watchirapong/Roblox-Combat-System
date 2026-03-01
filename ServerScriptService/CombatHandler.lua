@@ -22,7 +22,7 @@ local CombatConfig = require(ReplicatedStorage:WaitForChild("CombatConfig"))
 local VFXMod = ReplicatedStorage:FindFirstChild("VFXModule")
 local VFXModule = VFXMod and require(VFXMod) or { PlaySkillEffect = function() end }
 if not VFXMod and CombatConfig.EnableDebug then
-	warn("[Combat] ไม่พบ VFXModule — สร้าง ModuleScript ใน ReplicatedStorage จาก src/shared/VFXModule.lua")
+	warn("[Combat] ไม่พบ VFXModule — สร้าง ModuleScript ใน ReplicatedStorage จาก ReplicatedStorage/VFXModule.lua")
 end
 
 local combatDebugEvent = ReplicatedStorage:FindFirstChild("CombatDebug")

@@ -6,21 +6,38 @@
 
 ## การติดตั้ง
 
-### โครงสร้างไฟล์
+### โครงสร้างโฟลเดอร์ (เหมือน Roblox Explorer)
+
+```
+ReplicatedStorage/
+├── CombatConfig.lua
+├── VFXModule.lua
+├── AnimationModule.lua
+└── CombatSystem.lua
+
+ServerScriptService/
+└── CombatHandler.lua
+
+StarterPlayer/
+└── StarterPlayerScripts/
+    ├── CombatInput.lua
+    └── CombatUI.lua
+```
+
 ### วิธี Copy เข้า Roblox Studio
 
 1. สร้าง **ModuleScript** ใน **ReplicatedStorage** 4 ตัว:
-   - `CombatConfig` → โค้ดจาก `src/shared/CombatConfig.lua`
-   - `VFXModule` → โค้ดจาก `src/shared/VFXModule.lua`
-   - `AnimationModule` → โค้ดจาก `src/shared/AnimationModule.lua`
-   - `CombatSystem` → โค้ดจาก `src/shared/CombatSystem.lua`
+   - `CombatConfig` → โค้ดจาก `ReplicatedStorage/CombatConfig.lua`
+   - `VFXModule` → โค้ดจาก `ReplicatedStorage/VFXModule.lua`
+   - `AnimationModule` → โค้ดจาก `ReplicatedStorage/AnimationModule.lua`
+   - `CombatSystem` → โค้ดจาก `ReplicatedStorage/CombatSystem.lua`
 
 2. สร้าง **Script** ใน **ServerScriptService**:
-   - `CombatHandler` → โค้ดจาก `src/server/CombatHandler.lua`
+   - `CombatHandler` → โค้ดจาก `ServerScriptService/CombatHandler.lua`
 
 3. สร้าง **LocalScript** ใน **StarterPlayer** > **StarterPlayerScripts** 2 ตัว:
-   - `CombatInput` → โค้ดจาก `src/client/CombatInput.lua`
-   - `CombatUI` → โค้ดจาก `src/client/CombatUI.lua`
+   - `CombatInput` → โค้ดจาก `StarterPlayer/StarterPlayerScripts/CombatInput.lua`
+   - `CombatUI` → โค้ดจาก `StarterPlayer/StarterPlayerScripts/CombatUI.lua`
 
 ---
 

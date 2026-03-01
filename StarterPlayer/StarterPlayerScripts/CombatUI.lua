@@ -1,6 +1,6 @@
 --[[
 	CombatUI - แสดง Skill Bar และ Mana Bar
-	วางเป็น LocalScript ใน StarterPlayerScripts หรือใน StarterGui
+	วางเป็น LocalScript ใน StarterPlayerScripts
 ]]
 
 local Players = game:GetService("Players")
@@ -17,10 +17,8 @@ if CombatConfig.EnableSkillUI == false then return end
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- เก็บ cooldown ฝั่ง Client (ประมาณ)
 local skillCooldownEnd = {}
 
--- ฟังก์ชันแปลง KeyCode เป็น string แสดง
 local function keyToString(keyCode)
 	local map = {
 		[Enum.KeyCode.One] = "1",
@@ -35,14 +33,12 @@ local function keyToString(keyCode)
 	return map[keyCode] or tostring(keyCode):gsub("Enum.KeyCode.", "")
 end
 
--- สร้าง UI หลัก
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CombatUI"
 screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
 screenGui.Parent = playerGui
 
--- Frame หลัก Skill Bar (center ใช้ Scale 0.5 + AnchorPoint 0.5,0)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "SkillBar"
 mainFrame.Size = UDim2.new(0, 320, 0, 70)
@@ -56,7 +52,6 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = mainFrame
 
--- สร้างปุ่มสกิลแต่ละอัน
 local skillOrder = {}
 for skillId, skill in CombatConfig.Skills do
 	table.insert(skillOrder, { id = skillId, skill = skill })
@@ -79,7 +74,6 @@ for i, data in skillOrder do
 	slotCorner.CornerRadius = UDim.new(0, 6)
 	slotCorner.Parent = slot
 
-	-- คีย์
 	local keyLabel = Instance.new("TextLabel")
 	keyLabel.Size = UDim2.new(1, 0, 0, 22)
 	keyLabel.Position = UDim2.new(0, 0, 0, 0)
@@ -90,7 +84,6 @@ for i, data in skillOrder do
 	keyLabel.Font = Enum.Font.GothamBold
 	keyLabel.Parent = slot
 
-	-- ชื่อสกิล
 	local nameLabel = Instance.new("TextLabel")
 	nameLabel.Size = UDim2.new(1, -4, 0, 18)
 	nameLabel.Position = UDim2.new(0, 2, 0, 24)
@@ -101,7 +94,6 @@ for i, data in skillOrder do
 	nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	nameLabel.Parent = slot
 
-	-- โอเวอร์เลย์ cooldown (สีดำทับเมื่อ cooldown)
 	local overlay = Instance.new("Frame")
 	overlay.Name = "CooldownOverlay"
 	overlay.Size = UDim2.new(1, 0, 1, 0)
@@ -117,7 +109,6 @@ for i, data in skillOrder do
 	overlayCorner.CornerRadius = UDim.new(0, 6)
 	overlayCorner.Parent = overlay
 
-	-- ตัวเลข countdown ( optional )
 	local timeLabel = Instance.new("TextLabel")
 	timeLabel.Name = "Time"
 	timeLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -132,7 +123,6 @@ for i, data in skillOrder do
 	timeLabel.Parent = slot
 end
 
--- Mana Bar (เมื่อ UseMana = true)
 local manaFrame = nil
 local manaBar = nil
 if CombatConfig.UseMana then
@@ -170,12 +160,10 @@ if CombatConfig.UseMana then
 	fillCorner.Parent = manaBar
 end
 
--- อัปเดต cooldown overlay
 local function updateCooldownUI()
 	local now = tick()
 	for i, data in skillOrder do
 		local skillId = data.id
-		local skill = data.skill
 		local slot = mainFrame:FindFirstChild(skillId)
 		if not slot then continue end
 
@@ -196,7 +184,6 @@ local function updateCooldownUI()
 	end
 end
 
--- ฟังเมื่อใช้สกิล (CombatInput จะ Fire ตอนกดสกิล)
 local skillUsedEvent = ReplicatedStorage:FindFirstChild("SkillUsedClient")
 if not skillUsedEvent then
 	skillUsedEvent = Instance.new("BindableEvent")
@@ -209,13 +196,6 @@ skillUsedEvent.Event:Connect(function(skillId, cooldown)
 	end
 end)
 
--- Mana: ฝั่ง Client ไม่รู้ค่า mana จริง (อยู่ Server) เลยซ่อนหรือแสดง 100% ถ้า UseMana
--- ถ้าต้องการ Mana sync ต้องมี RemoteFunction/RemoteEvent จาก Server
-if manaBar then
-	manaBar.Size = UDim2.new(1, 0, 1, 0)
-end
-
--- Loop อัปเดต UI
 game:GetService("RunService").RenderStepped:Connect(updateCooldownUI)
 
 if CombatConfig.EnableDebug then

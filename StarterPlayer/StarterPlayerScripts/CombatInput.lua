@@ -1,7 +1,6 @@
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 
 local CombatConfig = require(ReplicatedStorage:WaitForChild("CombatConfig"))
 
@@ -29,7 +28,6 @@ local useSkillEvent = ReplicatedStorage:WaitForChild("UseSkill")
 local basicAttackEvent = ReplicatedStorage:WaitForChild("BasicAttack")
 
 local player = Players.LocalPlayer
-local cooldownUI = {}
 
 debugLog("CombatInput โหลดแล้ว — กด 1,2,3,4,F (ปิด Chat ก่อนกด)")
 
@@ -74,7 +72,6 @@ local function getNearestEnemy(maxDistance, debugReason)
 	return nearest
 end
 
--- กดสกิล
 local function onSkillInput(skillId)
 	local skill = CombatConfig.Skills[skillId]
 	if not skill then
@@ -92,25 +89,21 @@ local function onSkillInput(skillId)
 
 	useSkillEvent:FireServer(skillId, target)
 
-	-- แจ้ง UI แสดง cooldown
 	local skillUsedEvent = ReplicatedStorage:FindFirstChild("SkillUsedClient")
 	if skillUsedEvent then
 		skillUsedEvent:Fire(skillId, skill.Cooldown)
 	end
 
-	-- เล่น Animation
 	if player.Character then
 		AnimationModule.PlaySkillAnimation(player.Character, skillId)
 	end
 
-	-- เล่น VFX ฝั่ง Client (เช่น เอฟเฟกต์ที่ตัวผู้เล่น)
 	if VFXModule.IsEnabled() and player.Character then
 		local targetPos = target.Character and target.Character:FindFirstChild("HumanoidRootPart") and target.Character.HumanoidRootPart.Position
 		VFXModule.PlaySkillEffect(player.Character, skillId, targetPos or Vector3.zero)
 	end
 end
 
--- กดโจมตีธรรมดา (คลิกซ้าย หรือ F)
 local function onBasicAttack()
 	local target = getNearestEnemy(8, true)
 	if not target then
@@ -124,7 +117,6 @@ local function onBasicAttack()
 	basicAttackEvent:FireServer(target)
 end
 
--- ผูกคีย์
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then
 		local skillKeys = {"One","Two","Three","Four","F","Q","E","R"}
@@ -146,11 +138,4 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		debugLog("กดปุ่ม F (โจมตีธรรมดา)")
 		onBasicAttack()
 	end
-end)
-
--- ถ้าใช้ Click to attack
-local mouse = player:GetMouse()
-mouse.Button1Down:Connect(function()
-	-- เลือกได้ว่าจะให้คลิกโจมตีหรือไม่
-	-- onBasicAttack()
 end)

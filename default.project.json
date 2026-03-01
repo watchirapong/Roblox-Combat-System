@@ -4,35 +4,21 @@
 		"$className": "DataModel",
 		"ReplicatedStorage": {
 			"$className": "ReplicatedStorage",
-			"CombatConfig": {
-				"$path": "src/shared/CombatConfig.lua"
-			},
-			"VFXModule": {
-				"$path": "src/shared/VFXModule.lua"
-			},
-			"CombatSystem": {
-				"$path": "src/shared/CombatSystem.lua"
-			},
-			"AnimationModule": {
-				"$path": "src/shared/AnimationModule.lua"
-			}
+			"CombatConfig": { "$path": "ReplicatedStorage/CombatConfig.lua" },
+			"VFXModule": { "$path": "ReplicatedStorage/VFXModule.lua" },
+			"AnimationModule": { "$path": "ReplicatedStorage/AnimationModule.lua" },
+			"CombatSystem": { "$path": "ReplicatedStorage/CombatSystem.lua" }
 		},
 		"ServerScriptService": {
 			"$className": "ServerScriptService",
-			"CombatHandler": {
-				"$path": "src/server/CombatHandler.lua"
-			}
+			"CombatHandler": { "$path": "ServerScriptService/CombatHandler.lua" }
 		},
 		"StarterPlayer": {
 			"$className": "StarterPlayer",
 			"StarterPlayerScripts": {
 				"$className": "StarterPlayerScripts",
-				"CombatInput": {
-					"$path": "src/client/CombatInput.lua"
-				},
-				"CombatUI": {
-					"$path": "src/client/CombatUI.lua"
-				}
+				"CombatInput": { "$path": "StarterPlayer/StarterPlayerScripts/CombatInput.lua" },
+				"CombatUI": { "$path": "StarterPlayer/StarterPlayerScripts/CombatUI.lua" }
 			}
 		}
 	}
