@@ -29,7 +29,7 @@ local basicAttackEvent = ReplicatedStorage:WaitForChild("BasicAttack")
 
 local player = Players.LocalPlayer
 
-debugLog("CombatInput โหลดแล้ว — กด 1,2,3,4,F (ปิด Chat ก่อนกด)")
+debugLog("CombatInput โหลดแล้ว — คลิกซ้าย/F โจมตีธรรมดา, 1,2,3,4 สกิล")
 
 local function onSkillInput(skillId)
 	local skill = CombatConfig.Skills[skillId]
@@ -65,6 +65,14 @@ local function onBasicAttack()
 end
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	-- Left click = normal attack (skip if clicked on GUI)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		if not gameProcessed then
+			onBasicAttack()
+		end
+		return
+	end
+
 	if gameProcessed then
 		local skillKeys = {"One","Two","Three","Four","F","Q","E","R"}
 		if table.find(skillKeys, input.KeyCode.Name) then

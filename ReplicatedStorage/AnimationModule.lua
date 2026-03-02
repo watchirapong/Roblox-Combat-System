@@ -35,9 +35,15 @@ function AnimationModule.PlaySkillAnimation(character, skillId)
 end
 
 function AnimationModule.PlayBasicAttackAnimation(character)
+	local ids = CombatConfig.BasicAttackAnimationIds
+	if ids and type(ids) == "table" and #ids > 0 then
+		local animId = ids[math.random(1, #ids)]
+		return playAnimation(character, animId)
+	end
+	-- รองรับแบบเดิม (BasicAttackAnimationId เดียว)
 	local animId = CombatConfig.BasicAttackAnimationId
-	if not animId then return nil end
-	return playAnimation(character, animId)
+	if animId then return playAnimation(character, animId) end
+	return nil
 end
 
 return AnimationModule

@@ -33,7 +33,11 @@ return {
 	-- ความเสียหายโจมตีธรรมดา
 	BasicAttackDamage = 10,
 
-	BasicAttackAnimationId = "rbxassetid://0",
+	-- แอนิเมชันโจมตีธรรมดา — ใส่หลายอันจะสุ่มเลือกทีละอัน
+	BasicAttackAnimationIds = {
+		"rbxassetid://0",
+		-- เพิ่มได้ เช่น "rbxassetid://123456", "rbxassetid://789012",
+	},
 
 	-- Hitbox โจมตีธรรมดา (studs)
 	BasicAttackRange = 8,
