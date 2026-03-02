@@ -29,25 +29,6 @@ Roblox Combat System/
 
 ## 2. วิธีเอาโค้ดจาก GitHub มาใส่ใน Roblox (ทีละขั้นตอน สำหรับคนที่ไม่เคยทำเลย)
 
-### ขั้นตอนที่ 1: ดาวน์โหลดโค้ดจาก GitHub
-
-1. เปิดเว็บ **github.com** แล้วไปที่ Repository ของโปรเจกต์นี้
-2. กดปุ่มสีเขียว **Code** แล้วเลือก **Download ZIP**
-3. แตกไฟล์ ZIP (Unzip) แล้วเปิดโฟลเดอร์ จะเห็นโฟลเดอร์ย่อย เช่น `Roblox-Combat-System-master` หรือชื่ออื่น
-4. เปิดโฟลเดอร์จนเห็นไฟล์ `.lua` เช่น `CombatConfig.lua`, `CombatHandler.lua` เป็นต้น
-
-*(ถ้าใช้ Git: เปิด Terminal/CMD รัน `git clone <URL>`)*
-
-### ขั้นตอนที่ 2: เปิด Roblox Studio และสร้าง Place
-
-1. เปิด **Roblox Studio**
-2. สร้างเกมใหม่ (File > New) หรือเปิดเกมที่มีอยู่
-3. บันทึก Place ของคุณ (File > Save to Roblox / Save As)
-
-### ขั้นตอนที่ 3: สร้างโครงสร้างและ Copy โค้ด
-
-ทำตามลำดับนี้ทุกครั้ง ไม่สับสน:
-
 #### ส่วนที่ 1: ReplicatedStorage (ModuleScript 4 ตัว)
 
 1. คลิกขวาที่ **ReplicatedStorage** ใน Explorer → **Insert Object** → **ModuleScript**
