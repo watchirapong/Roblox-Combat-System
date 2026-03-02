@@ -18,6 +18,9 @@ return {
 	-- เปิด Debug = แสดงข้อความใน Output เมื่อใช้สกิล (ตั้ง true เวลาแก้ปัญหา)
 	EnableDebug = true,
 
+	-- แสดงกล่อง Hitbox สีโปร่งใสเมื่อใช้สกิล/โจมตี (ใช้ตอนดีบักเพื่อดูพื้นที่โจมตี)
+	ShowHitboxDebug = true,
+
 	-- ใช้ระบบแมนาไหม (true = หักแมนาตอนใช้สกิล, false = ไม่ใช้แมนาเลย)
 	UseMana = false,
 
@@ -30,8 +33,12 @@ return {
 	-- ความเสียหายโจมตีธรรมดา
 	BasicAttackDamage = 10,
 
-	-- Animation ID โจมตีธรรมดา (ใส่ 0 ถ้าไม่ใช้)
 	BasicAttackAnimationId = "rbxassetid://0",
+
+	-- Hitbox โจมตีธรรมดา (studs)
+	BasicAttackRange = 8,
+	BasicAttackHitboxWidth = 6,
+	BasicAttackHitboxHeight = 6,
 
 	-- รายการสกิลทั้งหมด
 	Skills = {
@@ -41,10 +48,12 @@ return {
 			Cooldown = 3,
 			Damage = 35,
 			Range = 12,
+			HitboxWidth = 8,
+			HitboxHeight = 8,
 			ManaCost = 15,
 			CastTime = 0.2,
 			VFXId = "rbxassetid://0",
-			AnimationId = "rbxassetid://0", -- ใส่ Animation ID จาก Roblox หรือ 0 ถ้าไม่ใช้
+			AnimationId = "rbxassetid://0",
 		},
 
 		["BlinkStrike"] = {
@@ -53,6 +62,8 @@ return {
 			Cooldown = 5,
 			Damage = 45,
 			Range = 25,
+			HitboxWidth = 10,
+			HitboxHeight = 10,
 			ManaCost = 25,
 			CastTime = 0,
 			VFXId = "rbxassetid://0",
@@ -64,20 +75,23 @@ return {
 			Keybind = Enum.KeyCode.Three,
 			Cooldown = 6,
 			Damage = 55,
-			Range = 8,
+			Range = 10,
+			HitboxWidth = 12,
+			HitboxHeight = 10,
 			ManaCost = 30,
 			CastTime = 0.3,
 			VFXId = "rbxassetid://0",
 			AnimationId = "rbxassetid://0",
 		},
 
-		-- สกิล Ulti
 		["Ultimate"] = {
 			DisplayName = "สกิลสุดท้าย",
 			Keybind = Enum.KeyCode.Four,
 			Cooldown = 30,
 			Damage = 150,
 			Range = 15,
+			HitboxWidth = 12,
+			HitboxHeight = 12,
 			ManaCost = 100,
 			CastTime = 0.5,
 			VFXId = "rbxassetid://0",

@@ -6,6 +6,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local Debris = game:GetService("Debris")
 
 -- สร้าง RemoteEvent ก่อน ให้ Client ไม่ค้าง
 for _, name in {"UseSkill", "BasicAttack", "CombatDebug"} do
@@ -86,89 +87,108 @@ local function canUseSkill(player, skillId)
 	return true
 end
 
-local function validateDistance(caster, target, range)
-	if not caster or not target then return false end
-	local cRoot = caster:FindFirstChild("HumanoidRootPart")
-	local tRoot = target:FindFirstChild("HumanoidRootPart")
-	if not cRoot or not tRoot then return false end
-	return (cRoot.Position - tRoot.Position).Magnitude <= range
+-- Hitbox: หา Humanoids ทั้งหมดในกล่องด้านหน้าผู้ใช้สกิล
+local function getTargetsInHitbox(caster, length, width, height)
+	local root = caster and caster:FindFirstChild("HumanoidRootPart")
+	if not root then return {} end
+
+	local cf = root.CFrame
+	local boxCF = cf + cf.LookVector * (length / 2)
+	local size = Vector3.new(width, height, length)
+
+	local overlapParams = OverlapParams.new()
+	overlapParams.FilterType = Enum.RaycastFilterType.Exclude
+	overlapParams.FilterDescendantsInstances = { caster }
+
+	local parts = workspace:GetPartBoundsInBox(boxCF, size, overlapParams)
+	local hit = {}
+	for _, part in parts do
+		local model = part:FindFirstAncestorOfClass("Model")
+		if model and model ~= caster and not hit[model] then
+			local humanoid = model:FindFirstChildOfClass("Humanoid")
+			if humanoid and humanoid.Health > 0 then
+				hit[model] = humanoid
+			end
+		end
+	end
+	return hit
+end
+
+-- สร้างกล่อง Hitbox Debug (ไม่พึ่ง VFXModule)
+local function showHitboxDebugBox(cframe, size, duration)
+	if CombatConfig.ShowHitboxDebug == false then return end
+
+	local box = Instance.new("Part")
+	box.Name = "HitboxDebug"
+	box.Anchored = true
+	box.CanCollide = false
+	box.CanQuery = false
+	box.CanTouch = false
+	box.Transparency = 0.5
+	box.Color = Color3.fromRGB(255, 80, 80)
+	box.Material = Enum.Material.ForceField
+	box.Size = size
+	box.CFrame = cframe
+	box.Parent = workspace
+
+	Debris:AddItem(box, duration or 0.8)
 end
 
 local useSkillEvent = ReplicatedStorage:WaitForChild("UseSkill")
 local basicAttackEvent = ReplicatedStorage:WaitForChild("BasicAttack")
 
--- รับจาก Client: ใช้สกิล
-useSkillEvent.OnServerEvent:Connect(function(player, skillId, target)
+-- รับจาก Client: ใช้สกิล (Hitbox)
+useSkillEvent.OnServerEvent:Connect(function(player, skillId)
 	if CombatConfig.EnableDebug then
 		print("[Combat Debug Server] รับสกิล: " .. tostring(skillId) .. " จาก " .. (player and player.Name or "nil"))
 	end
 
 	if not player or not player.Character then
-		if CombatConfig.EnableDebug then
-			warn("[Combat Debug Server] ไม่มี player หรือ Character")
-		end
+		if CombatConfig.EnableDebug then warn("[Combat Debug Server] ไม่มี player หรือ Character") end
 		return
 	end
 
 	local skill = CombatConfig.Skills[skillId]
 	if not skill then
-		if CombatConfig.EnableDebug then
-			warn("[Combat Debug Server] สกิลไม่รู้จัก: " .. tostring(skillId))
-		end
+		if CombatConfig.EnableDebug then warn("[Combat Debug Server] สกิลไม่รู้จัก: " .. tostring(skillId)) end
 		return
 	end
 
-	local canUse, err = canUseSkill(player, skillId)
+	local canUse = canUseSkill(player, skillId)
 	if not canUse then return end
 
-	local targetPlayer = type(target) == "Instance" and target or Players:GetPlayerByUserId(target)
-	local targetChar = targetPlayer and targetPlayer.Character
-	if not targetChar then
-		if CombatConfig.EnableDebug then
-			warn("[Combat Debug Server] ไม่มีเป้า (target หายหรือไม่มี Character)")
-		end
-		return
-	end
+	local length = skill.Range or 10
+	local width = skill.HitboxWidth or 8
+	local height = skill.HitboxHeight or 8
 
-	if not validateDistance(player.Character, targetChar, skill.Range) then
-		if CombatConfig.EnableDebug then
-			local tRoot = targetChar:FindFirstChild("HumanoidRootPart")
-			local d = tRoot and (player.Character.HumanoidRootPart.Position - tRoot.Position).Magnitude or 0
-			warn("[Combat Debug Server] ไกลเกินไป: ระยะ=" .. math.floor(d) .. " ต้องไม่เกิน " .. skill.Range)
-		end
-		return
-	end
+	local boxCF = (player.Character.HumanoidRootPart.CFrame) + (player.Character.HumanoidRootPart.CFrame.LookVector * (length / 2))
+	local boxSize = Vector3.new(width, height, length)
 
-	local targetHumanoid = targetChar:FindFirstChild("Humanoid")
-	if not targetHumanoid or targetHumanoid.Health <= 0 then
-		if CombatConfig.EnableDebug then
-			warn("[Combat Debug Server] เป้าตายหรือไม่มี Humanoid")
-		end
-		return
-	end
+	local hitTargets = getTargetsInHitbox(player.Character, length, width, height)
+
+	showHitboxDebugBox(boxCF, boxSize, 0.8)
 
 	-- บันทึก cooldown
 	local cooldowns = getCooldowns(player)
 	cooldowns[skillId] = tick()
 
-	-- หักแมนา (ถ้าเปิดระบบแมนา)
 	if CombatConfig.UseMana then
 		setMana(player, getMana(player) - skill.ManaCost)
 	end
 
-	-- ทำความเสียหาย
-	targetHumanoid:TakeDamage(skill.Damage)
-
-	if CombatConfig.EnableDebug then
-		print("[Combat Debug Server] สำเร็จ: " .. player.Name .. " -> " .. targetPlayer.Name .. " ความเสียหาย " .. skill.Damage)
+	for model, humanoid in pairs(hitTargets) do
+		humanoid:TakeDamage(skill.Damage)
+		if CombatConfig.EnableDebug then
+			print("[Combat Debug Server] Hitbox: " .. player.Name .. " -> " .. model.Name .. " ความเสียหาย " .. skill.Damage)
+		end
 	end
-
-	-- แจ้ง Client ให้เล่น VFX (ถ้าเปิดอยู่)
-	VFXModule.PlaySkillEffect(player.Character, skillId, targetChar:FindFirstChild("HumanoidRootPart") and targetChar.HumanoidRootPart.Position or Vector3.zero)
+	if CombatConfig.EnableVFX then
+		VFXModule.PlaySkillEffect(player.Character, skillId, Vector3.zero)
+	end
 end)
 
--- รับจาก Client: โจมตีธรรมดา
-basicAttackEvent.OnServerEvent:Connect(function(player, target)
+-- รับจาก Client: โจมตีธรรมดา (Hitbox)
+basicAttackEvent.OnServerEvent:Connect(function(player)
 	if CombatConfig.EnableDebug then
 		print("[Combat Debug Server] รับโจมตีธรรมดา จาก " .. (player and player.Name or "nil"))
 	end
@@ -182,37 +202,30 @@ basicAttackEvent.OnServerEvent:Connect(function(player, target)
 	local lastBasic = cooldowns["__basic"] or 0
 	if tick() - lastBasic < CombatConfig.BasicAttackCooldown then
 		if CombatConfig.EnableDebug then
-			warn("[Combat Debug Server] Basic: ยัง Cooldown (รอ " .. string.format("%.1f", CombatConfig.BasicAttackCooldown - (tick() - lastBasic)) .. "s)")
+			warn("[Combat Debug Server] Basic: ยัง Cooldown")
 		end
 		return
 	end
 
 	cooldowns["__basic"] = tick()
 
-	local targetPlayer = type(target) == "Instance" and target or Players:GetPlayerByUserId(target)
-	local targetChar = targetPlayer and targetPlayer.Character
-	if not targetChar then
-		if CombatConfig.EnableDebug then warn("[Combat Debug Server] Basic: ไม่มีเป้า") end
-		return
+	local length = CombatConfig.BasicAttackRange or 8
+	local width = CombatConfig.BasicAttackHitboxWidth or 6
+	local height = CombatConfig.BasicAttackHitboxHeight or 6
+
+	local hitTargets = getTargetsInHitbox(player.Character, length, width, height)
+
+	local root = player.Character:FindFirstChild("HumanoidRootPart")
+	if root then
+		local boxCF = root.CFrame + root.CFrame.LookVector * (length / 2)
+		showHitboxDebugBox(boxCF, Vector3.new(width, height, length), 0.6)
 	end
 
-	if not validateDistance(player.Character, targetChar, 8) then
+	for model, humanoid in pairs(hitTargets) do
+		humanoid:TakeDamage(CombatConfig.BasicAttackDamage)
 		if CombatConfig.EnableDebug then
-			local d = (player.Character.HumanoidRootPart.Position - targetChar.HumanoidRootPart.Position).Magnitude
-			warn("[Combat Debug Server] Basic: ไกลเกินไป ระยะ=" .. math.floor(d))
+			print("[Combat Debug Server] Basic Hitbox: " .. player.Name .. " -> " .. model.Name)
 		end
-		return
-	end
-
-	local targetHumanoid = targetChar:FindFirstChild("Humanoid")
-	if not targetHumanoid or targetHumanoid.Health <= 0 then
-		if CombatConfig.EnableDebug then warn("[Combat Debug Server] Basic: เป้าตาย") end
-		return
-	end
-
-	targetHumanoid:TakeDamage(CombatConfig.BasicAttackDamage)
-	if CombatConfig.EnableDebug then
-		print("[Combat Debug Server] Basic สำเร็จ: " .. player.Name .. " -> " .. targetPlayer.Name)
 	end
 end)
 

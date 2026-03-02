@@ -31,47 +31,6 @@ local player = Players.LocalPlayer
 
 debugLog("CombatInput โหลดแล้ว — กด 1,2,3,4,F (ปิด Chat ก่อนกด)")
 
-local function getNearestEnemy(maxDistance, debugReason)
-	local character = player.Character
-	if not character then
-		if debugReason then debugLog("ไม่มี Character") end
-		return nil
-	end
-	local root = character:FindFirstChild("HumanoidRootPart")
-	if not root then
-		if debugReason then debugLog("ไม่มี HumanoidRootPart") end
-		return nil
-	end
-
-	local nearest = nil
-	local nearestDist = maxDistance or 50
-	local allPlayers = Players:GetPlayers()
-
-	if debugReason and #allPlayers < 2 then
-		debugLog("ผู้เล่นน้อยกว่า 2 คน (" .. #allPlayers .. ") — เปิดเกมแบบ 2+ Players เพื่อทดสอบ")
-	end
-
-	for _, other in allPlayers do
-		if other ~= player and other.Character then
-			local otherRoot = other.Character:FindFirstChild("HumanoidRootPart")
-			local humanoid = other.Character:FindFirstChild("Humanoid")
-			if otherRoot and humanoid and humanoid.Health > 0 then
-				local dist = (root.Position - otherRoot.Position).Magnitude
-				if dist < nearestDist then
-					nearestDist = dist
-					nearest = other
-				end
-			end
-		end
-	end
-
-	if debugReason and not nearest then
-		debugLog("ไม่มีศัตรูในระยะ " .. (maxDistance or 50) .. " studs")
-	end
-
-	return nearest
-end
-
 local function onSkillInput(skillId)
 	local skill = CombatConfig.Skills[skillId]
 	if not skill then
@@ -79,15 +38,9 @@ local function onSkillInput(skillId)
 		return
 	end
 
-	local target = getNearestEnemy(skill.Range, true)
-	if not target then
-		debugLog("มีสกิลแต่ไม่มีเป้า — ต้องมีผู้เล่น 2 คนขึ้นไป หรือให้ศัตรูอยู่ในระยะ " .. skill.Range)
-		return
-	end
+	debugLog("ยิงสกิล " .. (skill.DisplayName or skillId))
 
-	debugLog("ยิงสกิล " .. (skill.DisplayName or skillId) .. " -> " .. target.Name)
-
-	useSkillEvent:FireServer(skillId, target)
+	useSkillEvent:FireServer(skillId)
 
 	local skillUsedEvent = ReplicatedStorage:FindFirstChild("SkillUsedClient")
 	if skillUsedEvent then
@@ -99,22 +52,16 @@ local function onSkillInput(skillId)
 	end
 
 	if VFXModule.IsEnabled() and player.Character then
-		local targetPos = target.Character and target.Character:FindFirstChild("HumanoidRootPart") and target.Character.HumanoidRootPart.Position
-		VFXModule.PlaySkillEffect(player.Character, skillId, targetPos or Vector3.zero)
+		VFXModule.PlaySkillEffect(player.Character, skillId, Vector3.zero)
 	end
 end
 
 local function onBasicAttack()
-	local target = getNearestEnemy(8, true)
-	if not target then
-		debugLog("กด F แต่ไม่มีเป้า")
-		return
-	end
-	debugLog("โจมตีธรรมดา -> " .. target.Name)
+	debugLog("โจมตีธรรมดา")
 	if player.Character then
 		AnimationModule.PlayBasicAttackAnimation(player.Character)
 	end
-	basicAttackEvent:FireServer(target)
+	basicAttackEvent:FireServer()
 end
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)

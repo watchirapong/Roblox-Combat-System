@@ -77,6 +77,27 @@ function VFXModule.PlayAtPosition(position, effectType, duration)
 	Debris:AddItem(container, duration)
 end
 
+-- แสดงกล่อง Hitbox (ใช้ตอนดีบัก)
+function VFXModule.ShowHitboxBox(cframe, size, duration)
+	if not CombatConfig.ShowHitboxDebug then return end
+
+	local box = Instance.new("Part")
+	box.Name = "HitboxDebug"
+	box.Anchored = true
+	box.CanCollide = false
+	box.CanQuery = false
+	box.CanTouch = false
+	box.Transparency = 0.7
+	box.Color = Color3.fromRGB(255, 80, 80)
+	box.Material = Enum.Material.ForceField
+	box.Size = size
+	box.CFrame = cframe
+	box.Parent = workspace
+
+	Debris:AddItem(box, duration or 0.5)
+	return box
+end
+
 -- แสดงเอฟเฟกต์สกิล
 function VFXModule.PlaySkillEffect(caster, skillId, targetPosition)
 	if not CombatConfig.EnableVFX then return end
